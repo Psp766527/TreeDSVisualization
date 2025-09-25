@@ -1,0 +1,213 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>DFS Traversals — Interactive Tree Visualizer</title>
+  <style>
+    :root{
+      --bg:#0f1724; --card:#0b1220; --accent:#06b6d4; --muted:#94a3b8; --node-bg:#111827; --node-border:#60a5fa;
+    }
+    html,body{height:100%;margin:0;background:linear-gradient(180deg,#020617 0%, #061529 100%);font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial}
+    .app{max-width:1100px;margin:24px auto;padding:18px;color:#e6eef6}
+    header{display:flex;align-items:center;gap:16px}
+    h1{margin:0;font-size:20px}
+    .controls{display:flex;gap:8px;align-items:center;margin-top:14px;flex-wrap:wrap}
+    input[type=number]{width:140px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:rgba(255,255,255,0.02);color:var(--muted)}
+    button{background:var(--accent);border:none;padding:8px 12px;border-radius:10px;color:#041025;cursor:pointer;font-weight:600}
+    button.ghost{background:transparent;border:1px solid rgba(255,255,255,0.06);color:var(--muted)}
+    .layout{display:grid;grid-template-columns:320px 1fr;gap:16px;margin-top:18px}
+    .panel{background:linear-gradient(180deg,rgba(255,255,255,0.02),rgba(255,255,255,0.01));padding:12px;border-radius:12px}
+    .panel h2{margin:0 0 8px 0;font-size:14px}
+    .info{font-size:13px;color:var(--muted);line-height:1.4}
+    .svg-wrap{background:#081226;border-radius:10px;padding:12px;height:640px;overflow:auto}
+    svg{width:100%;height:600px}
+    .node{fill:var(--node-bg);stroke:var(--node-border);stroke-width:2}
+    .node-label{font-size:12px;fill:#e6eef6;text-anchor:middle}
+    .edge{stroke:rgba(255,255,255,0.08);stroke-width:2}
+    .highlight{animation:pulse 900ms ease-in-out infinite;background:transparent}
+    @keyframes pulse{0%{filter:drop-shadow(0 0 0 rgba(239,68,68,0.0))}50%{filter:drop-shadow(0 0 16px rgba(239,68,68,0.9))}100%{filter:drop-shadow(0 0 0 rgba(239,68,68,0.0))}}
+    .traversal-list{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+    .pill{background:rgba(255,255,255,0.03);padding:6px 8px;border-radius:999px;font-size:13px;border:1px solid rgba(255,255,255,0.02)}
+    .status{margin-top:10px;font-size:13px;color:var(--muted)}
+    .legend{display:flex;gap:8px;align-items:center;margin-top:10px}
+    .legend .swatch{width:12px;height:12px;border-radius:3px}
+    .muted{color:var(--muted)}
+    footer{margin-top:12px;font-size:12px;color:var(--muted)}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <h1>DFS Traversals — Interactive Tree Visualizer</h1>
+        <div class="muted">Binary Search Tree insertion; visualizes Pre-order, In-order, Post-order and computes height as you insert</div>
+      </div>
+    </header>
+
+    <div class="controls">
+      <input id="valueInput" type="number" placeholder="Enter integer" />
+      <button id="insertBtn">Insert</button>
+      <button id="randomBtn" class="ghost">Insert random</button>
+      <button id="clearBtn" class="ghost">Clear tree</button>
+
+      <div style="width:16px"></div>
+
+      <button id="preBtn" class="ghost">Pre-order</button>
+      <button id="inBtn" class="ghost">In-order</button>
+      <button id="postBtn" class="ghost">Post-order</button>
+      <button id="animateBtn">Animate traversal</button>
+
+      <div style="flex:1"></div>
+
+      <div class="pill">Height: <span id="heightVal">0</span></div>
+      <div class="pill">Nodes: <span id="nodesVal">0</span></div>
+    </div>
+
+    <div class="layout">
+      <div class="panel">
+        <h2>Controls & Info</h2>
+        <div class="info">
+          • Insert integers to build a Binary Search Tree (duplicates ignored).<br>
+          • Use the traversal buttons to compute order. <br>
+          • "Animate traversal" will highlight nodes in chosen order (choose one of the three first).
+        </div>
+
+        <div style="margin-top:12px">
+          <div class="legend">
+            <div class="swatch" style="background:var(--node-border)"></div><div class="muted">Node outline</div>
+            <div class="swatch" style="background:#ef4444"></div><div class="muted">Visited (animation)</div>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <h2>Last Traversal</h2>
+          <div id="lastTraversal" class="traversal-list"></div>
+          <div class="status">Click any traversal to compute it instantly. For animation: select a traversal then click "Animate traversal".</div>
+        </div>
+
+        <footer>Tip: Press Enter to insert. Works well in desktop browsers.</footer>
+      </div>
+
+      <div class="panel svg-wrap">
+        <svg id="svgCanvas" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"></svg>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Simple BST implementation + layout + visualizer
+    class Node {
+      constructor(val) { this.val = val; this.left = null; this.right = null; this.x = 0; this.y = 0 }
+    }
+
+    const state = { root: null, nodesCount:0, lastTraversal: [], traversalType: null };
+    const svg = document.getElementById('svgCanvas');
+    const heightVal = document.getElementById('heightVal');
+    const nodesVal = document.getElementById('nodesVal');
+    const lastTraversalDiv = document.getElementById('lastTraversal');
+
+    function insertValue(v){
+      if (v === null || Number.isNaN(v)) return;
+      if (state.root === null) { state.root = new Node(v); state.nodesCount = 1; return true }
+      let cur = state.root; while(true){
+        if (v === cur.val) return false; // ignore duplicate
+        if (v < cur.val){ if (!cur.left){ cur.left = new Node(v); state.nodesCount++; return true } cur = cur.left }
+        else { if (!cur.right){ cur.right = new Node(v); state.nodesCount++; return true } cur = cur.right }
+      }
+    }
+
+    function computeHeight(node){ if (!node) return 0; return Math.max(computeHeight(node.left), computeHeight(node.right)) + 1 }
+
+    // layout: assign x positions using inorder index
+    function layoutTree(root){
+      let index = 0;
+      function dfs(n, depth){ if(!n) return; dfs(n.left, depth+1); n.x = ++index; n.y = depth; dfs(n.right, depth+1); }
+      dfs(root, 0);
+      // scale to svg viewBox width/height
+      const width = 1000, height = 600; const cols = Math.max(1, index);
+      const hGap = Math.min(60, Math.max(30, Math.floor(width / (cols+1))));
+      const levelGap = 80;
+      function scale(n){ if(!n) return; n.cx = n.x * hGap; n.cy = 40 + n.y * levelGap; scale(n.left); scale(n.right); }
+      scale(root);
+    }
+
+    function clearSVG(){ while(svg.firstChild) svg.removeChild(svg.firstChild); }
+
+    function render(){
+      clearSVG(); if(!state.root) return;
+      layoutTree(state.root);
+      // draw edges first
+      function drawEdges(n){ if(!n) return; if(n.left){ drawLine(n.cx, n.cy, n.left.cx, n.left.cy) } if(n.right){ drawLine(n.cx, n.cy, n.right.cx, n.right.cy) } drawEdges(n.left); drawEdges(n.right); }
+      drawEdges(state.root);
+      // draw nodes
+      function drawNodes(n){ if(!n) return; drawNode(n); drawNodes(n.left); drawNodes(n.right); }
+      drawNodes(state.root);
+      heightVal.textContent = computeHeight(state.root);
+      nodesVal.textContent = state.nodesCount;
+    }
+
+    function drawLine(x1,y1,x2,y2){ const l = document.createElementNS('http://www.w3.org/2000/svg','line'); l.setAttribute('x1',x1); l.setAttribute('y1',y1); l.setAttribute('x2',x2); l.setAttribute('y2',y2); l.setAttribute('class','edge'); svg.appendChild(l); }
+
+    function drawNode(n){ const g = document.createElementNS('http://www.w3.org/2000/svg','g'); g.setAttribute('transform',`translate(${n.cx},${n.cy})`);
+      const c = document.createElementNS('http://www.w3.org/2000/svg','circle'); c.setAttribute('r',22); c.setAttribute('class','node'); c.dataset.val = n.val; g.appendChild(c);
+      const t = document.createElementNS('http://www.w3.org/2000/svg','text'); t.setAttribute('y',5); t.setAttribute('class','node-label'); t.textContent = n.val; g.appendChild(t);
+      svg.appendChild(g);
+    }
+
+    // Traversals returning array of nodes
+    function preorder(node, res){ if(!node) return; res.push(node); preorder(node.left,res); preorder(node.right,res); }
+    function inorder(node, res){ if(!node) return; inorder(node.left,res); res.push(node); inorder(node.right,res); }
+    function postorder(node, res){ if(!node) return; postorder(node.left,res); postorder(node.right,res); res.push(node); }
+
+    function computeTraversal(type){ if(!state.root) return [];
+      const res = [];
+      if(type==='pre') preorder(state.root,res);
+      else if(type==='in') inorder(state.root,res);
+      else if(type==='post') postorder(state.root,res);
+      return res;
+    }
+
+    function showTraversalList(arr){ lastTraversalDiv.innerHTML=''; arr.forEach(n=>{ const el = document.createElement('div'); el.className='pill'; el.textContent = n.val; lastTraversalDiv.appendChild(el); }); }
+
+    // highlight helper
+    function highlightNode(val){ const circles = svg.querySelectorAll('circle'); circles.forEach(c=>{ if(Number(c.dataset.val)===val){ c.setAttribute('fill','#7f1d1d'); c.setAttribute('stroke','#ef4444'); c.classList.add('highlight'); } else { c.setAttribute('fill','var(--node-bg)'); c.setAttribute('stroke','var(--node-border)'); c.classList.remove('highlight'); } }); }
+
+    // animation
+    let animTimer = null;
+    function animateTraversal(type){ if(!state.root) return; const arr = computeTraversal(type); if(arr.length===0) return; state.traversalType = type; let i=0; if(animTimer) clearInterval(animTimer);
+      highlightNode(null);
+      animTimer = setInterval(()=>{
+        if(i>0){ // restore previous
+          const prev = arr[i-1]; const circles = svg.querySelectorAll('circle'); circles.forEach(c=>{ if(Number(c.dataset.val)===prev.val){ c.setAttribute('fill','var(--node-bg)'); c.setAttribute('stroke','var(--node-border)'); c.classList.remove('highlight'); } });
+        }
+        if(i>=arr.length){ clearInterval(animTimer); animTimer = null; return; }
+        const node = arr[i]; highlightNode(node.val);
+        i++;
+      }, 600);
+      showTraversalList(arr);
+    }
+
+    // wire UI
+    const input = document.getElementById('valueInput');
+    document.getElementById('insertBtn').addEventListener('click', ()=>{ const v = Number(input.value); if(!Number.isInteger(v)){ alert('Please enter an integer'); return } const added = insertValue(v); if(!added){ alert('Value already exists or invalid') } render(); input.value=''; input.focus(); });
+    document.getElementById('randomBtn').addEventListener('click', ()=>{ const v = Math.floor(Math.random()*100); insertValue(v); render(); });
+    document.getElementById('clearBtn').addEventListener('click', ()=>{ state.root=null; state.nodesCount=0; state.lastTraversal=[]; state.traversalType=null; lastTraversalDiv.innerHTML=''; render(); });
+
+    document.getElementById('preBtn').addEventListener('click', ()=>{ const arr = computeTraversal('pre'); state.lastTraversal = arr; state.traversalType='pre'; showTraversalList(arr); });
+    document.getElementById('inBtn').addEventListener('click', ()=>{ const arr = computeTraversal('in'); state.lastTraversal = arr; state.traversalType='in'; showTraversalList(arr); });
+    document.getElementById('postBtn').addEventListener('click', ()=>{ const arr = computeTraversal('post'); state.lastTraversal = arr; state.traversalType='post'; showTraversalList(arr); });
+    document.getElementById('animateBtn').addEventListener('click', ()=>{ if(!state.traversalType){ alert('Choose a traversal (Pre/In/Post) first'); return } animateTraversal(state.traversalType); });
+
+    input.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ document.getElementById('insertBtn').click(); } });
+
+    // click node to delete? (not requested) — but support clicking node to flash
+    svg.addEventListener('click', (e)=>{ const target = e.target; if(target.tagName==='circle'){ const val = Number(target.dataset.val); // flash
+        const prevFill = target.getAttribute('fill'); target.setAttribute('fill','#991b1b'); setTimeout(()=>{ target.setAttribute('fill',prevFill) },250); }
+    });
+
+    // initial small demo values
+    [50,30,70,20,40,60,80].forEach(v=>insertValue(v)); render();
+  </script>
+</body>
+</html>

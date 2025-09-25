@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌳 Quantum Tree Explorer | Interactive Data Structure Lab</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Exo+2:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Animated Background -->
+    <div class="stars"></div>
+    <div class="twinkling"></div>
+    <div class="clouds"></div>
+    
+    <div class="app-container">
+        <!-- Header Section -->
+        <header class="header">
+            <div class="header-glow"></div>
+            <div class="header-content">
+                <div class="title-section">
+                    <div class="title-icon">🌳</div>
+                    <h1 class="title">
+                        <span class="title-main">Quantum Tree Explorer</span>
+                        <span class="title-sub">Interactive Data Structure Laboratory</span>
+                    </h1>
+                </div>
+                <div class="header-controls">
+                    <button id="themeToggle" class="control-btn theme-toggle" title="Toggle Quantum Mode">
+                        <div class="btn-icon">⚡</div>
+                        <span class="btn-text">Quantum</span>
+                    </button>
+                    <button id="resetTree" class="control-btn reset-btn" title="Reset Simulation">
+                        <div class="btn-icon">🔄</div>
+                        <span class="btn-text">Reset</span>
+                    </button>
+                    <button id="fullscreenBtn" class="control-btn fullscreen-btn" title="Fullscreen Mode">
+                        <div class="btn-icon">⛶</div>
+                        <span class="btn-text">Full</span>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Left Panel -->
+            <div class="left-panel">
+                <!-- Tree Type Selection -->
+                <div class="tree-selector">
+                    <div class="selector-header">
+                        <div class="selector-icon">🌐</div>
+                        <label for="treeType">Choose Your Data Structure</label>
+                    </div>
+                    <div class="select-wrapper">
+                        <select id="treeType" class="neon-select">
+                            <optgroup label="🔸 Binary Trees">
+                                <option value="binary-tree">🌳 Binary Tree</option>
+                                <option value="full-binary">⚡ Full Binary Tree</option>
+                                <option value="perfect-binary">✨ Perfect Binary Tree</option>
+                                <option value="complete-binary">🎯 Complete Binary Tree</option>
+                                <option value="balanced-binary">⚖️ Balanced Binary Tree</option>
+                            </optgroup>
+                            <optgroup label="🔸 Search Trees">
+                                <option value="bst">🔍 Standard BST</option>
+                                <option value="avl">🔄 AVL Tree</option>
+                                <option value="red-black">🎨 Red-Black Tree</option>
+                            </optgroup>
+                            <optgroup label="🔸 Heaps">
+                                <option value="min-heap">📈 Min Heap</option>
+                                <option value="max-heap">📉 Max Heap</option>
+                            </optgroup>
+                            <optgroup label="🔸 Advanced Structures">
+                                <option value="b-tree">🗃️ B-Tree (3-order)</option>
+                                <option value="trie">🔤 Trie</option>
+                            </optgroup>
+                        </select>
+                        <div class="select-arrow">▼</div>
+                    </div>
+                </div>
+
+                <!-- Info Panel -->
+                <div class="info-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon">📊</div>
+                        <h3>Data Structure Intelligence</h3>
+                    </div>
+                    <div class="panel-content">
+                        <div id="treeDefinition" class="tree-definition">
+                            <div class="definition-card">
+                                <div class="card-icon">💡</div>
+                                <p>Select a data structure to unlock its secrets and properties.</p>
+                            </div>
+                        </div>
+                        <div id="treeFeatures" class="tree-features">
+                            <div class="section-header">
+                                <div class="section-icon">⚡</div>
+                                <h4>Quantum Properties</h4>
+                            </div>
+                            <ul id="featuresList" class="feature-list"></ul>
+                        </div>
+                        <div id="treeRules" class="tree-rules">
+                            <div class="section-header">
+                                <div class="section-icon">🎯</div>
+                                <h4>Operational Rules</h4>
+                            </div>
+                            <ul id="rulesList" class="rules-list"></ul>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Operations Panel -->
+                <div class="operations-panel">
+                    <div class="panel-header">
+                        <div class="panel-icon">🎮</div>
+                        <h3>Quantum Operations</h3>
+                    </div>
+                    
+                    <!-- Insert Operation -->
+                    <div class="operation-group">
+                        <div class="operation-header">
+                            <div class="op-icon">➕</div>
+                            <label for="insertValue">Insert Node</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="insertValue" placeholder="Enter value..." class="neon-input">
+                            <button id="insertBtn" class="neon-btn primary">
+                                <span class="btn-icon">⚡</span>
+                                <span>Insert</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Delete Operation -->
+                    <div class="operation-group">
+                        <div class="operation-header">
+                            <div class="op-icon">➖</div>
+                            <label for="deleteValue">Delete Node</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="deleteValue" placeholder="Enter value..." class="neon-input">
+                            <button id="deleteBtn" class="neon-btn danger">
+                                <span class="btn-icon">🗑️</span>
+                                <span>Delete</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Search Operation -->
+                    <div class="operation-group">
+                        <div class="operation-header">
+                            <div class="op-icon">🔍</div>
+                            <label for="searchValue">Search Node</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="searchValue" placeholder="Enter value..." class="neon-input">
+                            <button id="searchBtn" class="neon-btn info">
+                                <span class="btn-icon">🎯</span>
+                                <span>Search</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Update Operation -->
+                    <div class="operation-group">
+                        <div class="operation-header">
+                            <div class="op-icon">🔄</div>
+                            <label for="updateOldValue">Update Node</label>
+                        </div>
+                        <div class="input-group">
+                            <input type="text" id="updateOldValue" placeholder="Old value..." class="neon-input">
+                            <input type="text" id="updateNewValue" placeholder="New value..." class="neon-input">
+                            <button id="updateBtn" class="neon-btn warning">
+                                <span class="btn-icon">✨</span>
+                                <span>Update</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Traversals -->
+                    <div class="operation-group">
+                        <div class="operation-header">
+                            <div class="op-icon">🌊</div>
+                            <h4>Traversal Algorithms</h4>
+                        </div>
+                        <div class="traversal-buttons">
+                            <button id="preorderBtn" class="traversal-btn">
+                                <span class="btn-icon">🔸</span>
+                                <span>Pre-order</span>
+                            </button>
+                            <button id="inorderBtn" class="traversal-btn">
+                                <span class="btn-icon">🔹</span>
+                                <span>In-order</span>
+                            </button>
+                            <button id="postorderBtn" class="traversal-btn">
+                                <span class="btn-icon">🔺</span>
+                                <span>Post-order</span>
+                            </button>
+                            <button id="levelorderBtn" class="traversal-btn">
+                                <span class="btn-icon">🔻</span>
+                                <span>Level-order</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Special Operations -->
+                    <div id="specialOperations" class="operation-group">
+                        <div class="operation-header">
+                            <div class="op-icon">⚡</div>
+                            <h4>Special Operations</h4>
+                        </div>
+                        <div id="specialButtons" class="special-buttons"></div>
+                    </div>
+
+                    <!-- Step-by-Step Mode -->
+                    <div class="operation-group">
+                        <div class="step-mode-section">
+                            <label class="checkbox-label neon-checkbox">
+                                <input type="checkbox" id="stepMode">
+                                <span class="checkmark"></span>
+                                <span class="label-text">🎓 Learning Mode</span>
+                            </label>
+                            <div id="stepControls" class="step-controls" style="display: none;">
+                                <button id="nextStepBtn" class="neon-btn secondary">
+                                    <span class="btn-icon">⏭️</span>
+                                    <span>Next Step</span>
+                                </button>
+                                <button id="autoPlayBtn" class="neon-btn secondary">
+                                    <span class="btn-icon">▶️</span>
+                                    <span>Auto Play</span>
+                                </button>
+                                <div id="stepCounter" class="step-counter">Step: 0/0</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Traversal Results -->
+                <div class="traversal-results">
+                    <div class="panel-header">
+                        <div class="panel-icon">📈</div>
+                        <h4>Algorithm Results</h4>
+                    </div>
+                    <div id="traversalOutput" class="traversal-output">
+                        <div class="output-placeholder">
+                            <div class="placeholder-icon">🎯</div>
+                            <p>Run a traversal to see results here</p>
+                        </div>
+                    </div>
+                    <button id="downloadResults" class="neon-btn download-btn">
+                        <span class="btn-icon">💾</span>
+                        <span>Download Data</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Right Panel - Visualization -->
+            <div class="right-panel">
+                <div class="visualization-header">
+                    <div class="viz-icon">🌌</div>
+                    <h3>Quantum Visualization Lab</h3>
+                </div>
+                <div class="visualization-container">
+                    <div id="treeVisualization" class="tree-visualization">
+                        <div class="viz-background">
+                            <div class="grid-pattern"></div>
+                            <div class="particle-field"></div>
+                        </div>
+                        <svg id="treeSVG" width="100%" height="100%"></svg>
+                        <div class="viz-overlay">
+                            <div class="coordinates">X: 0, Y: 0</div>
+                            <div class="zoom-controls">
+                                <button class="zoom-btn" id="zoomIn">+</button>
+                                <button class="zoom-btn" id="zoomOut">-</button>
+                                <button class="zoom-btn" id="resetZoom">⌂</button>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="operationInfo" class="operation-info">
+                        <div class="info-card">
+                            <div class="info-icon">💡</div>
+                            <p>Select operations from the quantum control panel to interact with the data structure.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Rules Reminder Panel -->
+        <div id="rulesReminder" class="rules-reminder" style="display: none;">
+            <div class="reminder-glow"></div>
+            <div class="reminder-content">
+                <div class="reminder-header">
+                    <div class="reminder-icon">🎯</div>
+                    <h4>Quantum Rules Engine</h4>
+                </div>
+                <div id="rulesContent" class="rules-content"></div>
+                <button id="closeRules" class="close-btn">
+                    <span class="close-icon">✕</span>
+                </button>
+            </div>
+        </div>
+        
+        <!-- Loading Screen -->
+        <div id="loadingScreen" class="loading-screen">
+            <div class="loading-content">
+                <div class="loading-icon">🌳</div>
+                <div class="loading-text">Initializing Quantum Tree Explorer...</div>
+                <div class="loading-bar">
+                    <div class="loading-progress"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="js/tree-base.js"></script>
+    <script src="js/binary-tree.js"></script>
+    <script src="js/bst.js"></script>
+    <script src="js/avl-tree.js"></script>
+    <script src="js/red-black-tree.js"></script>
+    <script src="js/heap.js"></script>
+    <script src="js/b-tree.js"></script>
+    <script src="js/trie.js"></script>
+    <script src="js/visualizer.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>
